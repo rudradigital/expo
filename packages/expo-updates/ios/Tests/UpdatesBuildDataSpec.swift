@@ -144,5 +144,56 @@ class UpdatesBuildDataSpec : ExpoSpec {
         }
       }
     }
+
+    describe("isBuildDataConsistent") {
+      it("should return true for same data") {
+        let sourceBuildData = [
+          "EXUpdatesURL": "https://example.com",
+          "EXUpdatesRequestHeaders": ["expo-channel-name": "default"],
+        ]
+        let targetBuildData = [
+          "EXUpdatesURL": "https://example.com",
+          "EXUpdatesRequestHeaders": ["expo-channel-name": "default"],
+        ]
+        expect(UpdatesBuildData.isBuildDataConsistent(sourceBuildData, targetBuildData)).to(beTrue())
+      }
+
+      it("should return false for EXUpdatesRequestHeaders change") {
+        let sourceBuildData = [
+          "EXUpdatesURL": "https://example.com",
+          "EXUpdatesRequestHeaders": ["expo-channel-name": "default"],
+        ]
+        let targetBuildData = [
+          "EXUpdatesURL": "https://example.com",
+          "EXUpdatesRequestHeaders": ["expo-channel-name": "preview"],
+        ]
+        expect(UpdatesBuildData.isBuildDataConsistent(sourceBuildData, targetBuildData)).to(beFalse())
+      }
+
+      it("should support migration with new EXUpdatesHasEmbeddedUpdate key") {
+        let sourceBuildData = [
+          "EXUpdatesURL": "https://example.com",
+          "EXUpdatesRequestHeaders": ["expo-channel-name": "default"],
+        ]
+        let targetBuildData = [
+          "EXUpdatesURL": "https://example.com",
+          "EXUpdatesRequestHeaders": ["expo-channel-name": "default"],
+          "EXUpdatesHasEmbeddedUpdate": true
+        ]
+        expect(UpdatesBuildData.isBuildDataConsistent(sourceBuildData, targetBuildData)).to(beTrue())
+      }
+
+      it("should not overwrite existing data from the default build data") {
+        let sourceBuildData = [
+          "EXUpdatesURL": "https://example.com",
+          "EXUpdatesHasEmbeddedUpdate": false
+        ]
+        let targetBuildData = [
+          "EXUpdatesURL": "https://example.com",
+          "EXUpdatesHasEmbeddedUpdate": false
+        ]
+        expect(UpdatesBuildData.isBuildDataConsistent(sourceBuildData, targetBuildData)).to(beTrue())
+      }
+    }
   }
 }
